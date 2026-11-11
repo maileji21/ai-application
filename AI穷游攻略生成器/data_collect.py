@@ -10,6 +10,7 @@
 import os
 import csv
 import json
+import sys
 import requests
 from datetime import datetime
 
@@ -90,7 +91,11 @@ def search_pois(keyword, city):
         'offset': '8',         # 每页 8 条
         'page': '1',
     }
-    res = requests.get(gaode_url, params=params).json()
+    try:
+        res = requests.get(gaode_url, params=params, timeout=15).json()
+    except (requests.RequestException, ValueError) as e:
+        print(f'    [高德] {keyword} 请求失败：{e.__class__.__name__}')
+        return []
     return res.get('pois', []) if res.get('status') == '1' else []
 
 
@@ -205,8 +210,15 @@ def report(city):
 
 if __name__ == '__main__':
     reset_stats()
-    city = input('城市：').strip() or '杭州'
-    black_lst = [i for i in input('不想去（空格隔开）：').split(' ') if i]
-    types_lst = [j for j in input('景点类型（空格隔开）：').split(' ') if j]
+    # 支持命令行参数（便于批量/自动化），无参数时退回交互输入
+    # 用法：python data_collect.py 杭州 ["不想去的词 空格隔开"] ["类型 空格隔开"]
+    if len(sys.argv) > 1:
+        city = sys.argv[1].strip()
+        black_lst = sys.argv[2].split() if len(sys.argv) > 2 else []
+        types_lst = sys.argv[3].split() if len(sys.argv) > 3 else []
+    else:
+        city = input('城市：').strip() or '杭州'
+        black_lst = [i for i in input('不想去（空格隔开）：').split(' ') if i]
+        types_lst = [j for j in input('景点类型（空格隔开）：').split(' ') if j]
     spots = clean_collect(city, black_lst, types_lst)
     AI_collect(spots, city)

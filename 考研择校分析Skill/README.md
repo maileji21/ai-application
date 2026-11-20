@@ -10,12 +10,13 @@
 考研择校分析Skill/
 ├── SKILL.md          # Skill 定义：触发条件、使用步骤、注意事项
 ├── scripts/
-│   └── analyze.py    # 主脚本：数据匹配 + 分档 + LLM 调用 + 输出校验
+│   ├── analyze.py    # 主脚本：数据匹配 + 分档 + LLM 调用 + 输出校验
+│   └── visualize.py  # 可视化：pyecharts 产出五个看板（柱 / 线 / 饼 / 组合 / 四合一）
 └── data/
     └── 各院校历年数据采集.csv   # 5780 条录取记录（19 所院校、468 个专业，2023-2026）
 ```
 
-> 数据从哪来：录取数据由考研帮公开接口采集，**采集代码与 pyecharts 可视化看板**在另一个仓库 [maileji21/maileji.io](https://github.com/maileji21/maileji.io) 的 `02-考研院校数据分析` 目录。本仓库只放 AI 分析与 Skill 封装部分。
+> 数据从哪来：录取数据由考研帮公开接口采集，**采集代码**在另一个仓库 [maileji21/maileji.io](https://github.com/maileji21/maileji.io) 的 `02-考研院校数据分析` 目录。本仓库包含 AI 分析、Skill 封装与可视化看板脚本。
 
 ## 核心设计
 
@@ -44,6 +45,18 @@ python scripts/analyze.py --school 清华大学 --major 电子信息 --score 345
 ```
 
 stdout 输出 Markdown 分析结果，`--html` 可选生成 HTML 报告。
+
+可视化看板（可选）：
+
+```bash
+pip install pandas pyecharts
+python scripts/visualize.py
+```
+
+会在 `out/` 下生成五张图：横向柱状图、折线图、饼图、柱线组合，以及一份四合一页面。
+数据年份自动取 CSV 里最新的那一年，不写死。
+
+> 看板里的「招生人数」按各校在当年数据中**收录的专业条目数**统计，不是院校官方公布的招生计划数。要统计真实招生人数需要另一份数据源。
 
 ## 实测示例（清华大学 · 电子信息 · 345 分）
 
